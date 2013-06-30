@@ -19,6 +19,7 @@
  */
 
 #include "cAndroid.h"
+#include <stdio.h>
 
 cAndroid::cAndroid(CHAR* ApkFilename) : cFile(ApkFilename)
 {
@@ -51,6 +52,7 @@ BOOL cAndroid::ParseDex()
 	if (DexBufferSize != DexHeader->fileSize)
 		return FALSE;
 
+	/* Start String Items */
 	nStringIDs = DexHeader->stringIdsSize;
 	nStringItems = nStringIDs;
 	DexStringIds = (DEX_STRING_ID*)(DexBuffer + DexHeader->stringIdsOff);
@@ -59,36 +61,51 @@ BOOL cAndroid::ParseDex()
 	UINT StringSize;
 	for (UINT i=0; i<nStringIDs; i++)
 	{
-		StringItems[i].data = ULEB128_to_UCHAR((UCHAR*)DexBuffer + DexStringIds[i].stringDataOff, &StringSize);
-		StringItems[i].stringSize = StringSize;
-		//printf("%s\n", StringItems[i].data);
+		StringItems[i].Data = ULEB128_to_UCHAR((UCHAR*)DexBuffer + DexStringIds[i].stringDataOff, &StringSize);
+		StringItems[i].StringSize = StringSize;
 	}
+	/* End String Items */
 
+	/* Start Field IDs */
 	nFieldIDs = DexHeader->fieldIdsSize;
 	DexFieldIds = (DEX_FIELD_ID*)(DexBuffer + DexHeader->fieldIdsOff);
+	/* End Field IDs */
 
+	/* Start Type IDs */
 	nTypeIDs = DexHeader->typeIdsSize;
 	DexTypeIds = (DEX_TYPE_ID*)(DexBuffer + DexHeader->typeIdsOff);
+	/* End Type IDs */
 
-	for (UINT i=0; i<nTypeIDs; i++)
-	{
-		//printf("%s\n", StringItems[DexTypeIds[i].descriptorIdx].data);
-	}
-
+	/* Start Method IDs */
 	nMethodIDs = DexHeader->methodIdsSize;
 	DexMethodIds = (DEX_METHOD_ID*)(DexBuffer + DexHeader->methodIdsOff);
+	/* End Method IDs */
 
+	/* Start Prototype IDs */
 	nPrototypeIDs = DexHeader->protoIdsSize;
 	DexProtoIds = (DEX_PROTO_ID*)(DexBuffer + DexHeader->protoIdsOff);
+	/* End Prototype IDs */
 
-	for (UINT i=0; i<nPrototypeIDs; i++)
-	{
-		//printf("%s\n", StringItems[DexProtoIds[i].shortyIdx].data); 
-		//printf("%s\n", StringItems[DexTypeIds[DexProtoIds[i].returnTypeIdx].descriptorIdx].data);
-	}
-
+	/* Start Class Definitions */
 	nClassDefinitions = DexHeader->classDefsSize;
+	nClasses = nClassDefinitions;
+
+	DexClasses = (DEX_CLASS_STRUCTURE*)malloc(nClasses * sizeof(DEX_CLASS_STRUCTURE));
 	DexClassDefs = (DEX_CLASS_DEF*)(DexBuffer + DexHeader->classDefsOff);
+
+	for (UINT i=0; i<nClasses; i++)
+	{
+		DexClasses[i].Index = i;
+		DexClasses[i].Descriptor = StringItems[DexTypeIds[DexClassDefs[i].classIdx].StringIndex].Data;
+		DexClasses[i].AccessFlags = DexClassDefs[i].accessFlags;
+		DexClasses[i].SuperClass = StringItems[DexTypeIds[DexClassDefs[i].superclassIdx].StringIndex].Data;
+
+		if (DexClassDefs[i].sourceFileIdx != NO_INDEX)
+			DexClasses[i].SourceFile = StringItems[DexClassDefs[i].sourceFileIdx].Data;
+		else
+			DexClasses[i].SourceFile = (UCHAR*)"NULL";
+	}
+	/* End Class Definitions */
 
 	return TRUE;
 }
@@ -126,4 +143,5 @@ UCHAR *cAndroid::ULEB128_to_UCHAR(UCHAR *data, UINT *v)
 cAndroid::~cAndroid()
 {
 	free(StringItems);
+	delete DexBuffer;
 }

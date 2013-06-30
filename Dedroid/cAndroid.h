@@ -69,21 +69,21 @@ struct DEX_OPT_HEADER
 
 struct DEX_FIELD_ID
 {
-    USHORT	classIdx;           /* index into typeIds list for defining class */
-    USHORT	typeIdx;            /* index into typeIds for field type */
-    UINT	nameIdx;            /* index into stringIds for field name */
+    USHORT	ClassIndex;           /* index into typeIds list for defining class */
+    USHORT	TypeIdex;            /* index into typeIds for field type */
+    UINT	StringIndex;            /* index into stringIds for field name */
 };
 
 struct DEX_METHOD_ID
 {
-    USHORT  classIdx;           /* index into typeIds list for defining class */
-    USHORT  protoIdx;           /* index into protoIds for method prototype */
-    UINT	nameIdx;            /* index into stringIds for method name */
+    USHORT  ClassIndex;           /* index into typeIds list for defining class */
+    USHORT  PrototypeIndex;           /* index into protoIds for method prototype */
+    UINT	StringIndex;            /* index into stringIds for method name */
 };
 
 struct DEX_PROTO_ID
 {
-    UINT	shortyIdx;          /* index into stringIds for shorty descriptor */
+    UINT	StringIndex;          /* index into stringIds for shorty descriptor */
     UINT	returnTypeIdx;      /* index into typeIds list for return type */
     UINT	parametersOff;      /* file offset to type_list for parameter types */
 };
@@ -103,7 +103,7 @@ struct DEX_CLASS_DEF
 struct DEX_TYPE_ITEM	{ USHORT	typeIdx; };
 struct DEX_LINK			{ USHORT	bleargh; };
 struct DEX_STRING_ID	{ UINT		stringDataOff; };
-struct DEX_TYPE_ID		{ UINT		descriptorIdx; };
+struct DEX_TYPE_ID		{ UINT		StringIndex; };
 
 struct DEX_CLASS_LOOKUP
 {
@@ -118,8 +118,8 @@ struct DEX_CLASS_LOOKUP
 
 struct DEX_STRING_ITEM
 {
-	UINT	stringSize;
-	UCHAR*	data;
+	UINT	StringSize;
+	UCHAR*	Data;
 };
 
 struct DEX_FILE {
@@ -146,6 +146,54 @@ struct DEX_FILE {
 #define DEX_OPT_MAGIC			"dey\n"
 #define DEX_OPT_MAGIC_VERS		"036\0"
 #define DEX_DEP_MAGIC			"deps"
+
+enum {
+    ACC_PUBLIC       = 0x00000001,       // class, field, method, ic
+    ACC_PRIVATE      = 0x00000002,       // field, method, ic
+    ACC_PROTECTED    = 0x00000004,       // field, method, ic
+    ACC_STATIC       = 0x00000008,       // field, method, ic
+    ACC_FINAL        = 0x00000010,       // class, field, method, ic
+    ACC_SYNCHRONIZED = 0x00000020,       // method (only allowed on natives)
+    ACC_SUPER        = 0x00000020,       // class (not used in Dalvik)
+    ACC_VOLATILE     = 0x00000040,       // field
+    ACC_BRIDGE       = 0x00000040,       // method (1.5)
+    ACC_TRANSIENT    = 0x00000080,       // field
+    ACC_VARARGS      = 0x00000080,       // method (1.5)
+    ACC_NATIVE       = 0x00000100,       // method
+    ACC_INTERFACE    = 0x00000200,       // class, ic
+    ACC_ABSTRACT     = 0x00000400,       // class, method, ic
+    ACC_STRICT       = 0x00000800,       // method
+    ACC_SYNTHETIC    = 0x00001000,       // field, method, ic
+    ACC_ANNOTATION   = 0x00002000,       // class, ic (1.5)
+    ACC_ENUM         = 0x00004000,       // class, field, ic (1.5)
+    ACC_CONSTRUCTOR  = 0x00010000,       // method (Dalvik only)
+    ACC_DECLARED_SYNCHRONIZED =
+                       0x00020000,       // method (Dalvik only)
+    ACC_CLASS_MASK =
+        (ACC_PUBLIC | ACC_FINAL | ACC_INTERFACE | ACC_ABSTRACT
+                | ACC_SYNTHETIC | ACC_ANNOTATION | ACC_ENUM),
+    ACC_INNER_CLASS_MASK =
+        (ACC_CLASS_MASK | ACC_PRIVATE | ACC_PROTECTED | ACC_STATIC),
+    ACC_FIELD_MASK =
+        (ACC_PUBLIC | ACC_PRIVATE | ACC_PROTECTED | ACC_STATIC | ACC_FINAL
+                | ACC_VOLATILE | ACC_TRANSIENT | ACC_SYNTHETIC | ACC_ENUM),
+    ACC_METHOD_MASK =
+        (ACC_PUBLIC | ACC_PRIVATE | ACC_PROTECTED | ACC_STATIC | ACC_FINAL
+                | ACC_SYNCHRONIZED | ACC_BRIDGE | ACC_VARARGS | ACC_NATIVE
+                | ACC_ABSTRACT | ACC_STRICT | ACC_SYNTHETIC | ACC_CONSTRUCTOR
+                | ACC_DECLARED_SYNCHRONIZED),
+};
+
+struct DEX_CLASS_STRUCTURE
+{
+	UINT	Index;
+	UCHAR*	Descriptor;
+	UINT	AccessFlags;
+	UCHAR*	SuperClass;
+	UCHAR*	SourceFile;
+};
+
+UINT NO_INDEX = 0xffffffff; 
 
 class DLLEXPORT cAndroid : public cFile
 {
@@ -186,5 +234,8 @@ public:
 	const DEX_LINK*			DexLinkData;
 
 	DEX_STRING_ITEM*		StringItems;
+
+	UINT nClasses;
+	DEX_CLASS_STRUCTURE* DexClasses;
 };
 
