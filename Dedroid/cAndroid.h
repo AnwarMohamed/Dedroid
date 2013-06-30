@@ -21,6 +21,7 @@
 #pragma once
 #include "Dedroid.h"
 #include "cFile.h"
+#include "unzip.h"
 
 struct DEX_HEADER 
 {
@@ -146,17 +147,24 @@ struct DEX_FILE {
 #define DEX_OPT_MAGIC_VERS		"036\0"
 #define DEX_DEP_MAGIC			"deps"
 
-class DLLEXPORT cDex
+class DLLEXPORT cAndroid : public cFile
 {
-	cFile*		DexFile;
-	BOOL		ParseDex();
-	BOOL		ValidChecksum();
-public:
-	cDex(CHAR* Filename);
-	~cDex();
+	HZIP	ZipHandler;
+	UCHAR*	ULEB128_to_UCHAR(UCHAR *data, UINT *v);
+	long	Decompress();
+	BOOL	ProcessApk();
+	BOOL	ParseDex();
+	BOOL	ValidChecksum();
 
-	CHAR*		DexFilename;
-	BOOL		isLoaded;
+public:
+	cAndroid(CHAR* ApkFilename);
+	~cAndroid();
+
+	CHAR*	ApkFilename;
+	BOOL	isReady;
+
+	CHAR*	DexBuffer;
+	long	DexBufferSize;
 
 	UCHAR		DexVersion[4];
 	UINT		nStringIDs,
@@ -178,7 +186,5 @@ public:
 	const DEX_LINK*			DexLinkData;
 
 	DEX_STRING_ITEM*		StringItems;
-
-	UCHAR*		BaseAddress;
 };
 

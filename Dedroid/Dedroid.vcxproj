@@ -77,15 +77,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="cApk.h" />
-    <ClInclude Include="cDex.h" />
+    <ClInclude Include="cAndroid.h" />
     <ClInclude Include="cFile.h" />
     <ClInclude Include="Dedroid.h" />
     <ClInclude Include="unzip.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cApk.cpp" />
-    <ClCompile Include="cDex.cpp" />
+    <ClCompile Include="cAndroid.cpp" />
     <ClCompile Include="cFile.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="unzip.cpp" />
