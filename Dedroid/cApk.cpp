@@ -22,8 +22,10 @@
 
 cApk::cApk(CHAR* Filename, CHAR* BaseDir)
 {
+	isReady = FALSE;
 	ApkFilename = Filename;
 	ApkBaseDir = BaseDir;
+	isReady = TRUE;
 }
 
 cApk::~cApk()

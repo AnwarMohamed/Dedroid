@@ -33,4 +33,5 @@ public:
 	void	Decompress();
 	CHAR*	ApkFilename;
 	CHAR*	ApkBaseDir;
+	BOOL	isReady;
 };

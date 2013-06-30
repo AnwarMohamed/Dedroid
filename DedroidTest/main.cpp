@@ -20,12 +20,19 @@
 
 #include <Windows.h>
 #include "..\Dedroid\cApk.h"
+#include "..\Dedroid\cDex.h"
 
 INT main(INT argc, CHAR* argv[])
 {
 	cApk apk("H:\\Github\\Dedroid\\Dedroid\\Debug\\sample.apk",
 			"H:\\Github\\Dedroid\\Dedroid\\Debug\\sample");
-	apk.Decompress();
+
+	if (apk.isReady) 
+		apk.Decompress();
+
+	cDex dex("H:\\Github\\Dedroid\\Dedroid\\Debug\\sample\\classes.dex");
+
+	//if (dex.isLoaded)
 	
 	system("PAUSE");
 	return 0;

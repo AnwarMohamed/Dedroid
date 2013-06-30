@@ -56,6 +56,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -78,12 +79,14 @@
   <ItemGroup>
     <ClInclude Include="cApk.h" />
     <ClInclude Include="cDex.h" />
+    <ClInclude Include="cFile.h" />
     <ClInclude Include="Dedroid.h" />
     <ClInclude Include="unzip.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cApk.cpp" />
     <ClCompile Include="cDex.cpp" />
+    <ClCompile Include="cFile.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="unzip.cpp" />
   </ItemGroup>

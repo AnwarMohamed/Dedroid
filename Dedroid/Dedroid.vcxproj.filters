@@ -30,6 +30,9 @@
     <ClInclude Include="cDex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cApk.cpp">
@@ -42,6 +45,9 @@
       <Filter>External Sources</Filter>
     </ClCompile>
     <ClCompile Include="cDex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
