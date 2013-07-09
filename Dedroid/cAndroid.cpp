@@ -41,6 +41,7 @@ BOOL cAndroid::ProcessApk()
 
 BOOL cAndroid::ParseDex()
 {
+	UCHAR* BufPtr;
 	DexHeader = (DEX_HEADER*)DexBuffer;
 
 	//check for magic code for opt header
@@ -58,11 +59,11 @@ BOOL cAndroid::ParseDex()
 	DexStringIds = (DEX_STRING_ID*)(DexBuffer + DexHeader->stringIdsOff);
 	StringItems = (DEX_STRING_ITEM*)malloc(nStringItems * sizeof(DEX_STRING_ITEM));
 
-	UINT StringSize;
 	for (UINT i=0; i<nStringIDs; i++)
 	{
-		StringItems[i].Data = ULEB128_to_UCHAR((UCHAR*)DexBuffer + DexStringIds[i].stringDataOff, &StringSize);
-		StringItems[i].StringSize = StringSize;
+		BufPtr = (UCHAR*)DexBuffer + DexStringIds[i].stringDataOff;
+		StringItems[i].StringSize = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+		StringItems[i].Data = BufPtr;
 	}
 	/* End String Items */
 
@@ -95,7 +96,6 @@ BOOL cAndroid::ParseDex()
 
 	for (UINT i=0; i<nClasses; i++)
 	{
-		DexClasses[i].Index = i;
 		DexClasses[i].Descriptor = StringItems[DexTypeIds[DexClassDefs[i].classIdx].StringIndex].Data;
 		DexClasses[i].AccessFlags = DexClassDefs[i].accessFlags;
 		DexClasses[i].SuperClass = StringItems[DexTypeIds[DexClassDefs[i].superclassIdx].StringIndex].Data;
@@ -103,8 +103,78 @@ BOOL cAndroid::ParseDex()
 		if (DexClassDefs[i].sourceFileIdx != NO_INDEX)
 			DexClasses[i].SourceFile = StringItems[DexClassDefs[i].sourceFileIdx].Data;
 		else
-			DexClasses[i].SourceFile = (UCHAR*)"NULL";
+			DexClasses[i].SourceFile = (UCHAR*)"No Information Found";
+
+		if (DexClassDefs[i].classDataOff != NULL)
+		{
+			DexClasses[i].ClassData = new DEX_CLASS_STRUCTURE::CLASS_DATA;
+			DexClassData = (DEX_CLASS_DATA*)(DexBuffer + DexClassDefs[i].classDataOff);
+
+			BufPtr = (UCHAR*)DexClassData;
+
+			DexClasses[i].ClassData->StaticFieldsSize = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			DexClasses[i].ClassData->InstanceFieldsSize = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			DexClasses[i].ClassData->DirectMethodsSize = ReadUnsignedLeb128((const UCHAR**)&BufPtr);	
+			DexClasses[i].ClassData->VirtualMethodsSize = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+
+			DexClasses[i].ClassData->StaticFields = 
+				new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_FIELD[DexClasses[i].ClassData->StaticFieldsSize];
+			DexClasses[i].ClassData->InstanceFields = 
+				new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_FIELD[DexClasses[i].ClassData->InstanceFieldsSize];
+			DexClasses[i].ClassData->DirectMethods = 
+				new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD[DexClasses[i].ClassData->DirectMethodsSize];
+			DexClasses[i].ClassData->VirtualMethods = 
+				new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD[DexClasses[i].ClassData->VirtualMethodsSize];
+
+			UINT tmp, array_size = 0;
+
+			//if (DexClasses[i].ClassData->StaticFieldsSize > 0)
+				//array_size = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			for (UINT j=0; j<DexClasses[i].ClassData->StaticFieldsSize; j++)
+			{	
+				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				DexClasses[i].ClassData->StaticFields[j].Type = StringItems[DexTypeIds[ DexFieldIds[tmp].TypeIdex ].StringIndex].Data;
+				DexClasses[i].ClassData->StaticFields[j].Name = StringItems[DexFieldIds[tmp].StringIndex].Data;
+				DexClasses[i].ClassData->StaticFields[j].AccessFlags = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			}
+
+			//if (DexClasses[i].ClassData->InstanceFieldsSize > 0)
+				//array_size = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			for (UINT j=0; j<DexClasses[i].ClassData->InstanceFieldsSize; j++)
+			{
+				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				DexClasses[i].ClassData->InstanceFields[j].Type = StringItems[DexTypeIds[DexFieldIds[tmp].TypeIdex].StringIndex].Data;
+				DexClasses[i].ClassData->InstanceFields[j].Name = StringItems[DexFieldIds[tmp].StringIndex].Data;
+				DexClasses[i].ClassData->InstanceFields[j].AccessFlags = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				//ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			}
+
+			//if (DexClasses[i].ClassData->DirectMethodsSize > 0)
+				//array_size = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			for (UINT j=0; j<DexClasses[i].ClassData->DirectMethodsSize; j++)
+			{
+				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				DexClasses[i].ClassData->DirectMethods[j].ProtoType = 0;//StringItems[DexTypeIds[DexProtoIds[DexMethodIds[tmp].PrototypeIndex].returnTypeIdx].StringIndex].Data;
+				DexClasses[i].ClassData->DirectMethods[j].Type = StringItems[DexTypeIds[DexMethodIds[tmp].ClassIndex].StringIndex].Data;
+				DexClasses[i].ClassData->DirectMethods[j].Name = StringItems[DexMethodIds[tmp].StringIndex].Data;
+				DexClasses[i].ClassData->DirectMethods[j].AccessFlags = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			}
+
+			//if (DexClasses[i].ClassData->VirtualMethodsSize > 0)
+				//array_size = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			for (UINT j=0; j<DexClasses[i].ClassData->VirtualMethodsSize; j++)
+			{
+				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				DexClasses[i].ClassData->VirtualMethods[j].ProtoType = 0;//StringItems[DexProtoIds[DexMethodIds[tmp].PrototypeIndex].StringIndex].Data;
+				DexClasses[i].ClassData->VirtualMethods[j].Type = StringItems[DexTypeIds[DexMethodIds[tmp].ClassIndex].StringIndex].Data;
+				DexClasses[i].ClassData->VirtualMethods[j].Name = StringItems[DexMethodIds[tmp].StringIndex].Data;
+				DexClasses[i].ClassData->VirtualMethods[j].AccessFlags = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			}
+		}
 	}
+
 	/* End Class Definitions */
 
 	return TRUE;
@@ -127,21 +197,39 @@ long cAndroid::Decompress()
 	return DexBufferSize;
 }
 
-UCHAR *cAndroid::ULEB128_to_UCHAR(UCHAR *data, UINT *v) 
-{
-	UCHAR c;
-	UINT s, sum;
-	for (s = sum = 0; ; s+= 7) {
-		c = *(data++) & 0xff;
-		sum |= ((UINT) (c&0x7f)<<s);
-		if (!(c&0x80)) break;
-	}
-	if (v) *v = sum;
-	return data;
-}
-
 cAndroid::~cAndroid()
 {
 	free(StringItems);
 	delete DexBuffer;
+}
+
+INT cAndroid::ReadUnsignedLeb128(const UCHAR** pStream) 
+{
+    const UCHAR* ptr = *pStream;
+    int result = *(ptr++);
+
+    if (result > 0x7f) {
+        int cur = *(ptr++);
+        result = (result & 0x7f) | ((cur & 0x7f) << 7);
+        if (cur > 0x7f) {
+            cur = *(ptr++);
+            result |= (cur & 0x7f) << 14;
+            if (cur > 0x7f) {
+                cur = *(ptr++);
+                result |= (cur & 0x7f) << 21;
+                if (cur > 0x7f) {
+                    /*
+                     * Note: We don't check to see if cur is out of
+                     * range here, meaning we tolerate garbage in the
+                     * high four-order bits.
+                     */
+                    cur = *(ptr++);
+                    result |= cur << 28;
+                }
+            }
+        }
+    }
+
+    *pStream = ptr;
+    return result;
 }

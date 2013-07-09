@@ -88,6 +88,36 @@ struct DEX_PROTO_ID
     UINT	parametersOff;      /* file offset to type_list for parameter types */
 };
 
+struct DEX_CLASS_DATA_HEADER 
+{
+    UINT staticFieldsSize;
+    UINT instanceFieldsSize;
+    UINT directMethodsSize;
+    UINT virtualMethodsSize;
+};
+
+struct DEX_FIELD
+{
+    UINT fieldIdx;    /* index to a field_id_item */
+    UINT accessFlags;
+};
+
+struct DEX_METHOD 
+{
+    UINT methodIdx;    /* index to a method_id_item */
+    UINT accessFlags;
+    UINT codeOff;      /* file offset to a code_item */
+};
+
+struct DEX_CLASS_DATA 
+{
+	DEX_CLASS_DATA_HEADER header;
+	DEX_FIELD*          staticFields;
+    DEX_FIELD*          instanceFields;
+    DEX_METHOD*         directMethods;
+    DEX_METHOD*         virtualMethods;
+};
+
 struct DEX_CLASS_DEF 
 {
     UINT	classIdx;           /* index into typeIds for this class */
@@ -186,11 +216,37 @@ enum {
 
 struct DEX_CLASS_STRUCTURE
 {
-	UINT	Index;
 	UCHAR*	Descriptor;
 	UINT	AccessFlags;
 	UCHAR*	SuperClass;
 	UCHAR*	SourceFile;
+
+	struct CLASS_DATA
+	{
+		UINT StaticFieldsSize;
+		UINT InstanceFieldsSize;
+		UINT DirectMethodsSize;
+		UINT VirtualMethodsSize;
+
+		struct CLASS_FIELD 
+		{
+			UCHAR* Name;
+			UINT AccessFlags;
+			UCHAR* Type;
+		}	*StaticFields, 
+			*InstanceFields;
+
+		struct CLASS_METHOD 
+		{
+			UCHAR* Name;
+			UINT AccessFlags;
+			UCHAR* Type;
+			UCHAR* ProtoType;
+		}	*DirectMethods, 
+			*VirtualMethods;
+
+
+	}*	ClassData;
 };
 
 UINT NO_INDEX = 0xffffffff; 
@@ -198,7 +254,11 @@ UINT NO_INDEX = 0xffffffff;
 class DLLEXPORT cAndroid : public cFile
 {
 	HZIP	ZipHandler;
-	UCHAR*	ULEB128_to_UCHAR(UCHAR *data, UINT *v);
+
+	INT		ReadUnsignedLeb128(const UCHAR** pStream);
+	UINT	ULEB128toUINT(UCHAR *data);
+	UCHAR*	ULEB128toUCHAR(UCHAR *data, UINT *v);
+
 	long	Decompress();
 	BOOL	ProcessApk();
 	BOOL	ParseDex();
@@ -224,14 +284,15 @@ public:
 				
 				nStringItems;
 
-	const DEX_HEADER*		DexHeader;
-	const DEX_STRING_ID*	DexStringIds;
-    const DEX_TYPE_ID*		DexTypeIds;
-	const DEX_FIELD_ID*		DexFieldIds;
-	const DEX_METHOD_ID*	DexMethodIds;
-	const DEX_PROTO_ID*		DexProtoIds;
-	const DEX_CLASS_DEF*	DexClassDefs;
-	const DEX_LINK*			DexLinkData;
+	DEX_HEADER*		DexHeader;
+	DEX_STRING_ID*	DexStringIds;
+    DEX_TYPE_ID*	DexTypeIds;
+	DEX_FIELD_ID*	DexFieldIds;
+	DEX_METHOD_ID*	DexMethodIds;
+	DEX_PROTO_ID*	DexProtoIds;
+	DEX_CLASS_DEF*	DexClassDefs;
+	DEX_LINK*		DexLinkData;
+	DEX_CLASS_DATA*	DexClassData;
 
 	DEX_STRING_ITEM*		StringItems;
 

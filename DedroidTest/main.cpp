@@ -60,19 +60,53 @@ INT main(INT argc, CHAR* argv[])
 	//for (UINT i=0; i<android.nPrototypeIDs; i++)
 	//	printf("%s\n", android.StringItems[android.DexProtoIds[i].StringIndex].Data);
 
-	for (UINT i=0; i<1 /*android.nClassDefinitions*/; i++)
+	for (UINT i=0; i<2/*android.nClassDefinitions*/; i++)
 	{
 		//printf("%s\n", android.StringItems[android.DexClassDefs[i].sourceFileIdx].Data);
-		printf(	"\nClass #%d:\n" 
-				"\tClass Descriptor: '%s'\n"
-				"\tAccess Flags: 0x%04x\n"
-				"\tSuper Class: '%s'\n"
-				"\tSource File: '%s'\n",
-				android.DexClasses[i].Index,
-				android.DexClasses[i].Descriptor,
-				android.DexClasses[i].AccessFlags,
-				android.DexClasses[i].SuperClass,
-				android.DexClasses[i].SourceFile);
+		printf("\nClass #%d:\n" 
+			"\tClass Descriptor: '%s'\n"	"\tAccess Flags: 0x%04x\n"
+			"\tSuper Class: '%s'\n"			"\tSource File: '%s'\n\n",
+			i, android.DexClasses[i].Descriptor,
+			android.DexClasses[i].AccessFlags, android.DexClasses[i].SuperClass,
+			android.DexClasses[i].SourceFile);
+
+		printf("\tStatic Fields: %d\n", android.DexClasses[i].ClassData->StaticFieldsSize);
+		for (UINT j=0; j< android.DexClasses[i].ClassData->StaticFieldsSize; j++)
+		{
+			printf("\t#%d\n", j);
+			printf("\t\tName: '%s'\n", android.DexClasses[i].ClassData->StaticFields[j].Name);
+			printf("\t\tType: '%s'\n", android.DexClasses[i].ClassData->StaticFields[j].Type);
+			printf("\t\tAccess: 0x%x\n", android.DexClasses[i].ClassData->StaticFields[j].AccessFlags);
+		}
+
+		printf("\n\tInstance Fields: %d\n", android.DexClasses[i].ClassData->InstanceFieldsSize);
+		for (UINT j=0; j< android.DexClasses[i].ClassData->InstanceFieldsSize; j++)
+		{
+			printf("\t#%d\n", j);
+			printf("\t\tName: '%s'\n", android.DexClasses[i].ClassData->InstanceFields[j].Name);
+			printf("\t\tType: '%s'\n", android.DexClasses[i].ClassData->InstanceFields[j].Type);
+			printf("\t\tAccess: 0x%x\n", android.DexClasses[i].ClassData->InstanceFields[j].AccessFlags);
+		}
+
+		printf("\n\tDirect Methods: %d\n", android.DexClasses[i].ClassData->DirectMethodsSize);
+		for (UINT j=0; j< android.DexClasses[i].ClassData->DirectMethodsSize; j++)
+		{
+			printf("\t#%d\n", j);
+			printf("\t\tName: '%s'\n", android.DexClasses[i].ClassData->DirectMethods[j].Name);
+			printf("\t\tType: '(%s)%s'\n", android.DexClasses[i].ClassData->DirectMethods[j].Type, 
+				android.DexClasses[i].ClassData->VirtualMethods[j].ProtoType);
+			printf("\t\tAccess: 0x%x\n", android.DexClasses[i].ClassData->DirectMethods[j].AccessFlags);
+		}
+
+		printf("\n\tVirtual Methods: %d\n", android.DexClasses[i].ClassData->VirtualMethodsSize);
+		for (UINT j=0; j< android.DexClasses[i].ClassData->VirtualMethodsSize; j++)
+		{
+			printf("\t#%d\n", j);
+			printf("\t\tName: '%s'\n", android.DexClasses[i].ClassData->VirtualMethods[j].Name);
+			printf("\t\tType: '(%s)%s'\n", android.DexClasses[i].ClassData->VirtualMethods[j].Type,
+				android.DexClasses[i].ClassData->VirtualMethods[j].ProtoType);
+			printf("\t\tAccess: 0x%x\n", android.DexClasses[i].ClassData->VirtualMethods[j].AccessFlags);
+		}
 	}
 
 	system("PAUSE");
