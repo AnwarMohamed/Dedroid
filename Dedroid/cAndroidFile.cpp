@@ -18,17 +18,21 @@
  *
  */
 
-#include "cAndroid.h"
+#include "cAndroidFile.h"
 #include <stdio.h>
+#include <string>
+#include <regex>
 
-cAndroid::cAndroid(CHAR* ApkFilename) : cFile(ApkFilename)
+using namespace std;
+
+cAndroidFile::cAndroidFile(CHAR* ApkFilename) : cFile(ApkFilename)
 {
 	this->ApkFilename = ApkFilename;
 	DexBuffer = NULL;
 	isReady = ProcessApk();
 }
 
-BOOL cAndroid::ProcessApk()
+BOOL cAndroidFile::ProcessApk()
 {
 	if (Decompress() < 0) return FALSE;
 
@@ -39,7 +43,7 @@ BOOL cAndroid::ProcessApk()
 	return ParseDex();
 }
 
-BOOL cAndroid::ParseDex()
+BOOL cAndroidFile::ParseDex()
 {
 	UCHAR* BufPtr;
 	DexHeader = (DEX_HEADER*)DexBuffer;
@@ -191,8 +195,13 @@ BOOL cAndroid::ParseDex()
 	return TRUE;
 }
 
-long cAndroid::Decompress()
+long cAndroidFile::Decompress()
 {
+	string str;
+	tr1::regex rx("res/");
+	nResourceFiles = 0;
+	ResourceFiles = (UCHAR**)malloc( nResourceFiles * sizeof(UCHAR*));
+
 	ZipHandler = OpenZip((PVOID)BaseAddress, FileLength, 0);
 
 	ZIPENTRY ArchieveEntry;
@@ -204,17 +213,45 @@ long cAndroid::Decompress()
 	DexBuffer = new char[DexBufferSize];
 	UnzipItem(ZipHandler, ZipItemIndex, DexBuffer, DexBufferSize);
 
+	GetZipItem(ZipHandler, -1, &ArchieveEntry); 
+	UINT numitems=ArchieveEntry.index;
+
+	for (UINT i=0; i<numitems; i++)
+	{ 
+		GetZipItem(ZipHandler, i, &ArchieveEntry);
+		str = ArchieveEntry.name;
+		if (regex_match(str.begin(), str.begin() + 4, rx))
+		{
+			nResourceFiles++;
+			ResourceFiles = (UCHAR**)realloc(ResourceFiles, nResourceFiles * sizeof(UCHAR*));
+			ResourceFiles[nResourceFiles-1] = new UCHAR[str.length() + 100];
+			memset(ResourceFiles[nResourceFiles-1], 0, str.length() + 100);
+			int len = str.length();
+			memcpy_s(ResourceFiles[nResourceFiles-1], str.length(), &ArchieveEntry.name, str.length());
+		}
+		
+	}
+	
 	CloseZip(ZipHandler);
 	return DexBufferSize;
 }
 
-cAndroid::~cAndroid()
+cAndroidFile::~cAndroidFile()
 {
-	free(StringItems);
-	delete DexBuffer;
+	if (isReady)
+	{
+		free(StringItems);
+		delete DexBuffer;
+
+		for (UINT i=0; i<nResourceFiles; i++)
+			delete ResourceFiles[i];
+
+		free(ResourceFiles);
+	}
+
 }
 
-INT cAndroid::ReadUnsignedLeb128(const UCHAR** pStream) 
+INT cAndroidFile::ReadUnsignedLeb128(const UCHAR** pStream) 
 {
     const UCHAR* ptr = *pStream;
     int result = *(ptr++);
@@ -244,7 +281,7 @@ INT cAndroid::ReadUnsignedLeb128(const UCHAR** pStream)
     return result;
 };
 
-void cAndroid::GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE *
+void cAndroidFile::GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE *
 						   CodeArea, UINT Offset)
 {
 	CodeArea =  new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE;

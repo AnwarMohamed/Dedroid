@@ -27,7 +27,7 @@
     <ClInclude Include="cFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cAndroid.h">
+    <ClInclude Include="cAndroidFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,7 +41,7 @@
     <ClCompile Include="cFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cAndroid.cpp">
+    <ClCompile Include="cAndroidFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

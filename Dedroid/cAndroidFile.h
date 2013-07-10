@@ -271,7 +271,7 @@ struct DEX_CLASS_STRUCTURE
 
 UINT NO_INDEX = 0xffffffff; 
 
-class DLLEXPORT cAndroid : public cFile
+class DLLEXPORT cAndroidFile : public cFile
 {
 	HZIP	ZipHandler;
 
@@ -288,8 +288,8 @@ class DLLEXPORT cAndroid : public cFile
 	DEX_CODE* DexCode;
 
 public:
-	cAndroid(CHAR* ApkFilename);
-	~cAndroid();
+	cAndroidFile(CHAR* ApkFilename);
+	~cAndroidFile();
 
 	CHAR*	ApkFilename;
 	BOOL	isReady;
@@ -321,5 +321,8 @@ public:
 
 	UINT nClasses;
 	DEX_CLASS_STRUCTURE* DexClasses;
+
+	UCHAR** ResourceFiles;
+	UINT	nResourceFiles;
 };
 
