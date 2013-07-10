@@ -170,6 +170,21 @@ struct DEX_FILE {
     INT						overhead;
 };
 
+struct DEX_CODE 
+{
+    USHORT  registersSize;
+    USHORT  insSize;
+    USHORT  outsSize;
+    USHORT  triesSize;
+    UINT	debugInfoOff;       /* file offset to debug info stream */
+    UINT	insnsSize;          /* size of the insns array, in u2 units */
+    USHORT  insns[1];
+    /* followed by optional u2 padding */
+    /* followed by try_item[triesSize] */
+    /* followed by uleb128 handlersSize */
+    /* followed by catch_handler_item[handlersSize] */
+};
+
 #define DEX_MAGIC				"dex\n"
 #define DEX_MAGIC_VERS			"036\0"
 #define DEX_MAGIC_VERS_API_13	"035\0"
@@ -242,9 +257,14 @@ struct DEX_CLASS_STRUCTURE
 			UINT AccessFlags;
 			UCHAR* Type;
 			UCHAR* ProtoType;
+
+			struct CLASS_CODE
+			{
+				UINT t;
+			}	*CodeArea;
+
 		}	*DirectMethods, 
 			*VirtualMethods;
-
 
 	}*	ClassData;
 };
@@ -263,6 +283,9 @@ class DLLEXPORT cAndroid : public cFile
 	BOOL	ProcessApk();
 	BOOL	ParseDex();
 	BOOL	ValidChecksum();
+	void	GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE *CodeArea, UINT Offset);
+
+	DEX_CODE* DexCode;
 
 public:
 	cAndroid(CHAR* ApkFilename);

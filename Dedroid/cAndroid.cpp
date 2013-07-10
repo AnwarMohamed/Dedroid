@@ -126,51 +126,62 @@ BOOL cAndroid::ParseDex()
 			DexClasses[i].ClassData->VirtualMethods = 
 				new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD[DexClasses[i].ClassData->VirtualMethodsSize];
 
-			UINT tmp, array_size = 0;
+			UINT CurIndex = 0;
 
-			//if (DexClasses[i].ClassData->StaticFieldsSize > 0)
-				//array_size = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
 			for (UINT j=0; j<DexClasses[i].ClassData->StaticFieldsSize; j++)
 			{	
-				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
-				DexClasses[i].ClassData->StaticFields[j].Type = StringItems[DexTypeIds[ DexFieldIds[tmp].TypeIdex ].StringIndex].Data;
-				DexClasses[i].ClassData->StaticFields[j].Name = StringItems[DexFieldIds[tmp].StringIndex].Data;
+				CurIndex += ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				DexClasses[i].ClassData->StaticFields[j].Type = StringItems[DexTypeIds[ DexFieldIds[CurIndex].TypeIdex ].StringIndex].Data;
+				DexClasses[i].ClassData->StaticFields[j].Name = StringItems[DexFieldIds[CurIndex].StringIndex].Data;
 				DexClasses[i].ClassData->StaticFields[j].AccessFlags = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
 			}
 
-			//if (DexClasses[i].ClassData->InstanceFieldsSize > 0)
-				//array_size = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			CurIndex = 0;
 			for (UINT j=0; j<DexClasses[i].ClassData->InstanceFieldsSize; j++)
 			{
-				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
-				DexClasses[i].ClassData->InstanceFields[j].Type = StringItems[DexTypeIds[DexFieldIds[tmp].TypeIdex].StringIndex].Data;
-				DexClasses[i].ClassData->InstanceFields[j].Name = StringItems[DexFieldIds[tmp].StringIndex].Data;
+				CurIndex += ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				DexClasses[i].ClassData->InstanceFields[j].Type = StringItems[DexTypeIds[DexFieldIds[CurIndex].TypeIdex].StringIndex].Data;
+				DexClasses[i].ClassData->InstanceFields[j].Name = StringItems[DexFieldIds[CurIndex].StringIndex].Data;
 				DexClasses[i].ClassData->InstanceFields[j].AccessFlags = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
-				//ReadUnsignedLeb128((const UCHAR**)&BufPtr);
 			}
 
-			//if (DexClasses[i].ClassData->DirectMethodsSize > 0)
-				//array_size = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			CurIndex = 0;
 			for (UINT j=0; j<DexClasses[i].ClassData->DirectMethodsSize; j++)
 			{
-				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
-				DexClasses[i].ClassData->DirectMethods[j].ProtoType = 0;//StringItems[DexTypeIds[DexProtoIds[DexMethodIds[tmp].PrototypeIndex].returnTypeIdx].StringIndex].Data;
-				DexClasses[i].ClassData->DirectMethods[j].Type = StringItems[DexTypeIds[DexMethodIds[tmp].ClassIndex].StringIndex].Data;
-				DexClasses[i].ClassData->DirectMethods[j].Name = StringItems[DexMethodIds[tmp].StringIndex].Data;
+				CurIndex += ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				DexClasses[i].ClassData->DirectMethods[j].ProtoType = 
+					StringItems[DexTypeIds[DexProtoIds[DexMethodIds[CurIndex].PrototypeIndex].returnTypeIdx].StringIndex].Data;
+
+				//DexClasses[i].ClassData->DirectMethods[j].Type = StringItems[DexTypeIds[DexMethodIds[CurIndex].ClassIndex].StringIndex].Data;
+				DexClasses[i].ClassData->DirectMethods[j].Name = StringItems[DexMethodIds[CurIndex].StringIndex].Data;
 				DexClasses[i].ClassData->DirectMethods[j].AccessFlags = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
-				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+
+				UINT code_offset = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				if (code_offset == NULL)
+					DexClasses[i].ClassData->DirectMethods[j].CodeArea = NULL;
+				else
+					GetCodeArea(DexClasses[i].ClassData->DirectMethods[j].CodeArea, code_offset);
+
 			}
 
-			//if (DexClasses[i].ClassData->VirtualMethodsSize > 0)
-				//array_size = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+			CurIndex = 0;
 			for (UINT j=0; j<DexClasses[i].ClassData->VirtualMethodsSize; j++)
 			{
-				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
-				DexClasses[i].ClassData->VirtualMethods[j].ProtoType = 0;//StringItems[DexProtoIds[DexMethodIds[tmp].PrototypeIndex].StringIndex].Data;
-				DexClasses[i].ClassData->VirtualMethods[j].Type = StringItems[DexTypeIds[DexMethodIds[tmp].ClassIndex].StringIndex].Data;
-				DexClasses[i].ClassData->VirtualMethods[j].Name = StringItems[DexMethodIds[tmp].StringIndex].Data;
+				CurIndex += ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				DexClasses[i].ClassData->VirtualMethods[j].ProtoType = 
+					StringItems[DexTypeIds[DexProtoIds[DexMethodIds[CurIndex].PrototypeIndex].returnTypeIdx].StringIndex].Data;
+
+				//DexClasses[i].ClassData->VirtualMethods[j].Type = 
+				//	StringItems[DexProtoIds[DexMethodIds[CurIndex].PrototypeIndex].StringIndex].Data;
+
+				DexClasses[i].ClassData->VirtualMethods[j].Name = StringItems[DexMethodIds[CurIndex].StringIndex].Data;
 				DexClasses[i].ClassData->VirtualMethods[j].AccessFlags = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
-				tmp = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+
+				UINT code_offset = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
+				if (code_offset == NULL)
+					DexClasses[i].ClassData->VirtualMethods[j].CodeArea = NULL;
+				else
+					GetCodeArea(DexClasses[i].ClassData->VirtualMethods[j].CodeArea, code_offset);
 			}
 		}
 	}
@@ -208,21 +219,20 @@ INT cAndroid::ReadUnsignedLeb128(const UCHAR** pStream)
     const UCHAR* ptr = *pStream;
     int result = *(ptr++);
 
-    if (result > 0x7f) {
+    if (result > 0x7f) 
+	{
         int cur = *(ptr++);
         result = (result & 0x7f) | ((cur & 0x7f) << 7);
-        if (cur > 0x7f) {
+        if (cur > 0x7f) 
+		{
             cur = *(ptr++);
             result |= (cur & 0x7f) << 14;
-            if (cur > 0x7f) {
+            if (cur > 0x7f) 
+			{
                 cur = *(ptr++);
                 result |= (cur & 0x7f) << 21;
-                if (cur > 0x7f) {
-                    /*
-                     * Note: We don't check to see if cur is out of
-                     * range here, meaning we tolerate garbage in the
-                     * high four-order bits.
-                     */
+                if (cur > 0x7f) 
+				{
                     cur = *(ptr++);
                     result |= cur << 28;
                 }
@@ -232,4 +242,11 @@ INT cAndroid::ReadUnsignedLeb128(const UCHAR** pStream)
 
     *pStream = ptr;
     return result;
-}
+};
+
+void cAndroid::GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE *
+						   CodeArea, UINT Offset)
+{
+	CodeArea =  new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE;
+	DexCode = (DEX_CODE*)(DexBuffer + Offset);
+};

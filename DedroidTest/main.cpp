@@ -60,7 +60,7 @@ INT main(INT argc, CHAR* argv[])
 	//for (UINT i=0; i<android.nPrototypeIDs; i++)
 	//	printf("%s\n", android.StringItems[android.DexProtoIds[i].StringIndex].Data);
 
-	for (UINT i=0; i<2/*android.nClassDefinitions*/; i++)
+	for (UINT i=0; i<3/*android.nClassDefinitions*/; i++)
 	{
 		//printf("%s\n", android.StringItems[android.DexClassDefs[i].sourceFileIdx].Data);
 		printf("\nClass #%d:\n" 
@@ -93,8 +93,7 @@ INT main(INT argc, CHAR* argv[])
 		{
 			printf("\t#%d\n", j);
 			printf("\t\tName: '%s'\n", android.DexClasses[i].ClassData->DirectMethods[j].Name);
-			printf("\t\tType: '(%s)%s'\n", android.DexClasses[i].ClassData->DirectMethods[j].Type, 
-				android.DexClasses[i].ClassData->VirtualMethods[j].ProtoType);
+			printf("\t\tType: '%s'\n", android.DexClasses[i].ClassData->DirectMethods[j].ProtoType);
 			printf("\t\tAccess: 0x%x\n", android.DexClasses[i].ClassData->DirectMethods[j].AccessFlags);
 		}
 
@@ -103,8 +102,7 @@ INT main(INT argc, CHAR* argv[])
 		{
 			printf("\t#%d\n", j);
 			printf("\t\tName: '%s'\n", android.DexClasses[i].ClassData->VirtualMethods[j].Name);
-			printf("\t\tType: '(%s)%s'\n", android.DexClasses[i].ClassData->VirtualMethods[j].Type,
-				android.DexClasses[i].ClassData->VirtualMethods[j].ProtoType);
+			printf("\t\tType: '%s'\n", android.DexClasses[i].ClassData->VirtualMethods[j].ProtoType);
 			printf("\t\tAccess: 0x%x\n", android.DexClasses[i].ClassData->VirtualMethods[j].AccessFlags);
 		}
 	}
