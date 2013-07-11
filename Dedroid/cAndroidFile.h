@@ -324,5 +324,7 @@ public:
 
 	UCHAR** ResourceFiles;
 	UINT	nResourceFiles;
+
+	cFile**	DecompressResourceFiles(/*INT Index = -1*/);
 };
 

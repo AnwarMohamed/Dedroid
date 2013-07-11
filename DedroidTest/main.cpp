@@ -31,6 +31,7 @@ INT main(INT argc, TCHAR* argv[])
 
 	if (android.isReady)
 	{
+		cFile** tmp = android.DecompressResourceFiles();
 		printf("DexFile Loaded at 0x%08x with size %d bytes\n\n", android.DexBuffer, android.DexBufferSize);
 
 		//printf("= Strings ==========\n");

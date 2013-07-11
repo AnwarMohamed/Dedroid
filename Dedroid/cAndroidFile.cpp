@@ -224,20 +224,21 @@ long cAndroidFile::Decompress()
 		{
 			nResourceFiles++;
 			ResourceFiles = (UCHAR**)realloc(ResourceFiles, nResourceFiles * sizeof(UCHAR*));
-			ResourceFiles[nResourceFiles-1] = new UCHAR[str.length() + 100];
-			memset(ResourceFiles[nResourceFiles-1], 0, str.length() + 100);
+			ResourceFiles[nResourceFiles-1] = new UCHAR[str.length()];
+			memset(ResourceFiles[nResourceFiles-1], 0, str.length());
 			int len = str.length();
 			memcpy_s(ResourceFiles[nResourceFiles-1], str.length(), &ArchieveEntry.name, str.length());
 		}
 		
 	}
 	
-	CloseZip(ZipHandler);
 	return DexBufferSize;
 }
 
 cAndroidFile::~cAndroidFile()
 {
+	CloseZip(ZipHandler);
+
 	if (isReady)
 	{
 		free(StringItems);
@@ -287,3 +288,26 @@ void cAndroidFile::GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CL
 	CodeArea =  new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE;
 	DexCode = (DEX_CODE*)(DexBuffer + Offset);
 };
+
+cFile**	cAndroidFile::DecompressResourceFiles(/*INT Index*/)
+{
+	ZIPENTRY ArchieveEntry;
+	INT ZipItemIndex;
+	UINT BufferSize;
+	CHAR* Buffer;
+	cFile**	ResFiles;
+
+	ResFiles = new cFile*[nResourceFiles];
+	for (UINT i=0; i<nResourceFiles; i++)
+	{
+		memset(&ArchieveEntry, 0, sizeof(ZIPENTRY));
+
+		FindZipItem(ZipHandler, (const TCHAR*)ResourceFiles[i], TRUE, &ZipItemIndex, &ArchieveEntry);
+		BufferSize = ArchieveEntry.unc_size;
+		Buffer = new CHAR[DexBufferSize];
+		UnzipItem(ZipHandler, ZipItemIndex, Buffer, BufferSize);
+		ResFiles[i] = new cFile(Buffer, BufferSize);
+	}
+
+	return ResFiles;
+}
