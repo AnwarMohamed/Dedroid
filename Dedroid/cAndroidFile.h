@@ -260,8 +260,17 @@ struct DEX_CLASS_STRUCTURE
 
 			struct CLASS_CODE
 			{
-				UINT t;
-			}	*CodeArea;
+				USHORT nRegisters;
+				USHORT nInArgvs;
+				USHORT nOutArgvs;
+				UINT nInstructions;
+
+				struct CLASS_CODE_INSTRUCTIONS
+				{
+					UINT t;
+				} *Instructions;
+
+			}	*CodeDisassemblyArea;
 
 		}	*DirectMethods, 
 			*VirtualMethods;
@@ -283,7 +292,7 @@ class DLLEXPORT cAndroidFile : public cFile
 	BOOL	ProcessApk();
 	BOOL	ParseDex();
 	BOOL	ValidChecksum();
-	void	GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE *CodeArea, UINT Offset);
+	void	GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE *CodeDisassemblyArea, UINT Offset);
 
 	DEX_CODE* DexCode;
 

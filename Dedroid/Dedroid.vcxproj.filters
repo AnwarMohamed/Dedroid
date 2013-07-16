@@ -30,6 +30,9 @@
     <ClInclude Include="cAndroidFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="hOpcodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cAndroidFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sOpcodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

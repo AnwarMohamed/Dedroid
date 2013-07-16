@@ -80,12 +80,14 @@
     <ClInclude Include="cAndroidFile.h" />
     <ClInclude Include="cFile.h" />
     <ClInclude Include="Dedroid.h" />
+    <ClInclude Include="hOpcodes.h" />
     <ClInclude Include="unzip.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cAndroidFile.cpp" />
     <ClCompile Include="cFile.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="sOpcodes.cpp" />
     <ClCompile Include="unzip.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

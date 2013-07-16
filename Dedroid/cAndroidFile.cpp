@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <string>
 #include <regex>
+#include <iostream>
+#include "hOpcodes.h"
 
 using namespace std;
 
@@ -162,9 +164,9 @@ BOOL cAndroidFile::ParseDex()
 
 				UINT code_offset = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
 				if (code_offset == NULL)
-					DexClasses[i].ClassData->DirectMethods[j].CodeArea = NULL;
+					DexClasses[i].ClassData->DirectMethods[j].CodeDisassemblyArea = NULL;
 				else
-					GetCodeArea(DexClasses[i].ClassData->DirectMethods[j].CodeArea, code_offset);
+					GetCodeArea(DexClasses[i].ClassData->DirectMethods[j].CodeDisassemblyArea, code_offset);
 
 			}
 
@@ -183,9 +185,9 @@ BOOL cAndroidFile::ParseDex()
 
 				UINT code_offset = ReadUnsignedLeb128((const UCHAR**)&BufPtr);
 				if (code_offset == NULL)
-					DexClasses[i].ClassData->VirtualMethods[j].CodeArea = NULL;
+					DexClasses[i].ClassData->VirtualMethods[j].CodeDisassemblyArea = NULL;
 				else
-					GetCodeArea(DexClasses[i].ClassData->VirtualMethods[j].CodeArea, code_offset);
+					GetCodeArea(DexClasses[i].ClassData->VirtualMethods[j].CodeDisassemblyArea, code_offset);
 			}
 		}
 	}
@@ -283,10 +285,22 @@ INT cAndroidFile::ReadUnsignedLeb128(const UCHAR** pStream)
 };
 
 void cAndroidFile::GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE *
-						   CodeArea, UINT Offset)
+						   CodeDisassemblyArea, UINT Offset)
 {
-	CodeArea =  new DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE;
+	typedef DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE ClassCodeStruct;
+
+	CodeDisassemblyArea =  new ClassCodeStruct;
 	DexCode = (DEX_CODE*)(DexBuffer + Offset);
+	
+	CodeDisassemblyArea->nRegisters = DexCode->registersSize; 
+	CodeDisassemblyArea->nInArgvs = DexCode->insSize;
+	CodeDisassemblyArea->nOutArgvs = DexCode->outsSize;
+	CodeDisassemblyArea->nInstructions = DexCode->insnsSize;
+
+	CodeDisassemblyArea->Instructions = new 
+		ClassCodeStruct::CLASS_CODE_INSTRUCTIONS[CodeDisassemblyArea->nInstructions];
+
+
 };
 
 cFile**	cAndroidFile::DecompressResourceFiles(/*INT Index*/)

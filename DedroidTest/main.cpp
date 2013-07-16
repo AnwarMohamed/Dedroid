@@ -24,7 +24,7 @@
 
 INT main(INT argc, TCHAR* argv[])
 {
-	printf("Dedroid Apk parser:\n\tusage: dedroid.exe [apkfile]\n");
+	//printf("Dedroid Apk parser:\n\tusage: dedroid.exe [apkfile]\n");
 	if (argc < 2) return 0;
 
 	cAndroidFile android(argv[1]/*"H:\\Github\\Dedroid\\Dedroid\\Debug\\sample.apk"*/);
@@ -32,13 +32,13 @@ INT main(INT argc, TCHAR* argv[])
 	if (android.isReady)
 	{
 		cFile** tmp = android.DecompressResourceFiles();
-		printf("DexFile Loaded at 0x%08x with size %d bytes\n\n", android.DexBuffer, android.DexBufferSize);
+		//printf("DexFile Loaded at 0x%08x with size %d bytes\n\n", android.DexBuffer, android.DexBufferSize);
 
 		//printf("= Strings ==========\n");
 		//for (UINT i=0; i<android.nStringItems; i++)
 		//	printf("%d %s\n", android.StringItems[i].StringSize, android.StringItems[i].Data);
 
-		printf(	"Total String Items: \t%d\n"
+		/*printf(	"Total String Items: \t%d\n"
 				"      Type Descripters \t%d\n"
 				"      Method Items \t%d\n"
 				"      Field Items \t%d\n"
@@ -51,7 +51,7 @@ INT main(INT argc, TCHAR* argv[])
 
 		printf("\n= ResourceFiles ======\n\n");
 		for (UINT i=0; i<android.nResourceFiles; i++)
-			printf("%s\n", android.ResourceFiles[i]);
+			printf("%s\n", android.ResourceFiles[i]);*/
 
 		//printf("\n= Field Items ======\n\n");
 		//for (UINT i=0; i<android.nFieldIDs; i++)
@@ -69,7 +69,7 @@ INT main(INT argc, TCHAR* argv[])
 		//for (UINT i=0; i<android.nPrototypeIDs; i++)
 		//	printf("%s\n", android.StringItems[android.DexProtoIds[i].StringIndex].Data);
 
-		for (UINT i=0; i<android.nClassDefinitions; i++)
+		for (UINT i=0; i<0/*android.nClassDefinitions*/; i++)
 		{
 			//printf("%s\n", android.StringItems[android.DexClassDefs[i].sourceFileIdx].Data);
 			printf("\nClass #%d:\n" 
@@ -119,6 +119,6 @@ INT main(INT argc, TCHAR* argv[])
 	else 
 		printf("Unable to load your APK file\n");
 
-	//system("PAUSE");
+	system("PAUSE");
 	return 0;
 }
