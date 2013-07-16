@@ -284,11 +284,10 @@ INT cAndroidFile::ReadUnsignedLeb128(const UCHAR** pStream)
     return result;
 };
 
-void cAndroidFile::GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE *
-						   CodeDisassemblyArea, UINT Offset)
-{
-	typedef DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE ClassCodeStruct;
+typedef DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CLASS_CODE ClassCodeStruct;
 
+void cAndroidFile::GetCodeArea(ClassCodeStruct *CodeDisassemblyArea, UINT Offset)
+{
 	CodeDisassemblyArea =  new ClassCodeStruct;
 	DexCode = (DEX_CODE*)(DexBuffer + Offset);
 	
@@ -300,7 +299,11 @@ void cAndroidFile::GetCodeArea(DEX_CLASS_STRUCTURE::CLASS_DATA::CLASS_METHOD::CL
 	CodeDisassemblyArea->Instructions = new 
 		ClassCodeStruct::CLASS_CODE_INSTRUCTIONS[CodeDisassemblyArea->nInstructions];
 
-
+	for (int i=0; i< CodeDisassemblyArea->nInstructions; i++)
+	{
+		cout << GetOpcodeName(OpcodeFromUshort(DexCode->insns[i])) << endl;
+	}
+	cout << endl;
 };
 
 cFile**	cAndroidFile::DecompressResourceFiles(/*INT Index*/)
