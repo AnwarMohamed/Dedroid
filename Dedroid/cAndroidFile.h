@@ -16,6 +16,7 @@
  *  along with this program; if not, write to Anwar Mohamed
  *  anwarelmakrahy[at]gmail.com
  *
+ *  Note that some structs were coded by Google
  */
 
 #pragma once
@@ -248,6 +249,7 @@ struct DEX_CLASS_STRUCTURE
 			UCHAR* Name;
 			UINT AccessFlags;
 			UCHAR* Type;
+
 		}	*StaticFields, 
 			*InstanceFields;
 
@@ -267,7 +269,21 @@ struct DEX_CLASS_STRUCTURE
 
 				struct CLASS_CODE_INSTRUCTIONS
 				{
-					UINT t;
+					USHORT Opcode;
+					const CHAR* OpcodeMnemonic;
+					USHORT nArgvs;
+
+					struct INSTRUCTION_ARGVS
+					{
+						UINT    vA;
+						UINT    vB;
+						UINT64  vB_wide;
+						UINT    vC;
+						UINT    arg[5];
+						CHAR*	IndexType;
+
+					} *Argvs;
+
 				} *Instructions;
 
 			}	*CodeDisassemblyArea;

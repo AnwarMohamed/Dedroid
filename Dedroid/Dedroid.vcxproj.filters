@@ -47,8 +47,5 @@
     <ClCompile Include="cAndroidFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sOpcodes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

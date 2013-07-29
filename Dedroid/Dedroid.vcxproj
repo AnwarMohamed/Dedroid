@@ -87,7 +87,6 @@
     <ClCompile Include="cAndroidFile.cpp" />
     <ClCompile Include="cFile.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="sOpcodes.cpp" />
     <ClCompile Include="unzip.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
